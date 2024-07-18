@@ -16,6 +16,8 @@ const Homepage = () => {
 
   //管理所有圖片請求，除了更多圖片請求QQ
   const search = async (url) => {
+    //由於非同步操作原因，如果不先清空data，可能會出現舊的圖片資料
+    setData([]);
     try {
       //如果沒有輸入url就用initURL
       console.log(url);
@@ -25,22 +27,25 @@ const Homepage = () => {
           Authorization: API_KEY,
         },
       });
-      //由於非同步操作原因，如果不先清空data，可能會出現舊的圖片資料
-      setData([]);
-      setData(result.data.photos);
       setPage(1);
       setCurrentSearch(query);
+
+      setData(result.data.photos);
+
+      console.log("點擊search的URL: " + url);
     } catch (error) {
+      console.log(error);
       console.log(error.name + ": " + error.message);
     }
   };
 
   const morePicture = async () => {
     try {
+      console.log(currentSearch);
       setPage(page + 1);
       let newURL;
       //如果有執行過搜尋，就使用過暫存的搜尋詞。
-      if (currentSearch === "") {
+      if (currentSearch) {
         //由於closure的緣故，setPage(page+1)時，page的值仍為1，但確實有被更改。
         newURL = `https://api.pexels.com/v1/search?query=${currentSearch}&per_page=15&page=${
           page + 1
@@ -50,6 +55,7 @@ const Homepage = () => {
           page + 1
         }`;
       }
+      console.log("點擊morePicture的URL: " + newURL);
       let result = await axios.get(newURL, {
         headers: {
           Authorization: API_KEY,
@@ -58,6 +64,7 @@ const Homepage = () => {
       //記得要加[]，不然他就不是陣列了QQ
       setData([...data, ...result.data.photos]);
     } catch (error) {
+      console.log(error);
       console.log(error.name + ": " + error.message);
     }
   };
